@@ -13,7 +13,7 @@ class Student(BaseModel):
     first_name: str
     second_name: str
     group: int
-    completed_labs: [LabsChoices]
+    completed_labs: list[LabsChoices]
 
 app = FastAPI(
     title="Labs API",
@@ -28,3 +28,10 @@ STUDENTS = [
     {'id': 4, 'first_name': 'Анна', 'second_name': 'Попова', 'group': '507', 'completed_labs': []},
     {'id': 5, 'first_name': 'Сергей', 'second_name': 'Васильев', 'group': '507', 'completed_labs': ['LR1', 'LR2', 'LR3']}
 ]
+
+# GET получение всего списка студентов
+@app.get('/Students')
+def Students() -> list[Student]:
+    return [
+        Student(**s) for s in STUDENTS
+    ]
