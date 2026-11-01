@@ -8,12 +8,16 @@ class LabsChoices(Enum):
     Lab2 = 'LR2'
     Lab3 = 'LR3'
 
+# Базовая схема студента
 class Student(BaseModel):
-    id: int
     first_name: str
     second_name: str
     group: int
     completed_labs: list[LabsChoices]
+
+# Схема с системным ID для ответа клиенту
+class StudentWithID(Student):
+    id: int
 
 app = FastAPI(
     title="Labs API",
@@ -31,13 +35,21 @@ STUDENTS = [
 
 # GET получение всего списка студентов
 @app.get('/Students')
-def students() -> list[Student]:
+def students() -> list[StudentWithID]:
     return [
-        Student(**s) for s in STUDENTS
+        StudentWithID(**s) for s in STUDENTS
     ]
 
 # GET получение студента по ID
 @app.get('/Students/{student_id}')
-def student_with_id(student_id: int) -> Student:
-    exact_student = next((Student(**s) for s in STUDENTS if s['id'] == student_id), None)
+def student_with_id(student_id: int) -> StudentWithID:
+    exact_student = next((StudentWithID(**s) for s in STUDENTS if s['id'] == student_id), None)
     return exact_student
+
+# POST создание новой записи студента
+@app.post('/Students')
+def create_student(student_data: Student) -> StudentWithID:
+    id = STUDENTS[-1]['id'] + 1
+    student = StudentWithID(id=id, **student_data.model_dump()).model_dump()
+    STUDENTS.append(student)
+    return student
