@@ -1,0 +1,13 @@
+# Байткод и кэш
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Окружения
+venv/
+.venv/
+env/
+
+# Конфигурация IDE
+.idea/
+.env
