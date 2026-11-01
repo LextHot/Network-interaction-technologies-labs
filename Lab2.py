@@ -31,7 +31,13 @@ STUDENTS = [
 
 # GET получение всего списка студентов
 @app.get('/Students')
-def Students() -> list[Student]:
+def students() -> list[Student]:
     return [
         Student(**s) for s in STUDENTS
     ]
+
+# GET получение студента по ID
+@app.get('/Students/{student_id}')
+def student_with_id(student_id: int) -> Student:
+    exact_student = next((Student(**s) for s in STUDENTS if s['id'] == student_id), None)
+    return exact_student
