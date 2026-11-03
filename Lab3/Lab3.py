@@ -48,6 +48,13 @@ class Student(BaseModel):
 class StudentWithID(Student):
     id: int
 
+# Схема для частичного изменения данных студента
+class StudentUpdate(BaseModel):
+    first_name: str | None = None
+    second_name: str | None = None
+    group: int | None = None
+    completed_labs: list[LabsChoices] | None = None
+
 app = FastAPI(
     title="Labs API",
     description="Лабораторная работа №3: ЛР2 + SQLite, SQLAlchemy"
@@ -89,3 +96,24 @@ def delete_student(student_id: int, db: Session = Depends(get_db)):
     db.delete(db_student)
     db.commit()
     return None
+
+
+# PATCH изменение данных студента по ID
+@app.patch('/Students/{student_id}')
+def update_student(student_id: int, student_update: StudentUpdate, db: Session = Depends(get_db)) -> StudentWithID:
+    exact_student = db.get(StudentModel, student_id)
+    if exact_student is None:
+        raise HTTPException(status_code=404, detail=f'Student with ID {student_id} not found')
+
+    # Исключить поля, которые клиент не прислал
+    update_data = student_update.model_dump(exclude_unset=True)
+
+    if 'completed_labs' in update_data and update_data['completed_labs'] is not None:
+        update_data['completed_labs'] = [l.value for l in student_update.completed_labs]
+
+    for key, value in update_data.items():
+        setattr(exact_student, key, value)
+
+    db.commit()
+    db.refresh(exact_student)
+    return exact_student
