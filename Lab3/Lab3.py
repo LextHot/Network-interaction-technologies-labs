@@ -93,7 +93,7 @@ def delete_student(student_id: int, db: Session = Depends(get_db)):
     exact_student = db.get(StudentModel, student_id)
     if exact_student is None:
         raise HTTPException(status_code=404, detail=f'Student with ID {student_id} not found')
-    db.delete(db_student)
+    db.delete(exact_student)
     db.commit()
     return None
 
